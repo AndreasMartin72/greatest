@@ -1,5 +1,117 @@
 # greatest Changes By Release
 
+## v1.4.0 - 2018-03-05
+
+### API Changes
+
+Added `greatest_abort_on_fail`, which sets a flag to call `abort()` on
+the first test failure (`-a` in the CLI test runner). If tests are
+running inside a debugger, this will break right on the failure.
+Feature suggestion and initial implementation by @fsaintjacques.
+
+Added `greatest_list_only()`, which sets the same flag as the `-l`
+option in the CLI test runner.
+
+Added `greatest_set_test_suffix(const char *suffix)`, which can
+be used to add a suffix to the name printed for the next test.
+This can be used to distinguish between tests when running
+parametric tests (particularly when shuffled). Note that this
+suffix is included in the matching for `-t` and `-x`.
+
+The `greatest_info` struct now allocates a `char` buffer for the test
+name and optional '_' separator & suffix. The buffer size can be
+configured by `#define`ing `GREATEST_TESTNAME_BUF_SIZE`. (See
+`example_trunc.c`.) If the test name plus optional suffix does not fit
+in the buffer, it will be truncated and `\0` terminated.
+
+Made a couple functions `static` that were previously exposed, but
+explictly listed as being internal (`greatest_do_pass`,
+`greatest_do_fail`, `greatest_do_skip`, `greatest_suite_pre`,
+`greatest_suite_post`, `greatest_usage`).
+
+
+### Other Improvements
+
+Fixed link to ISC license in README.md. (Thanks @vaibhavsagar.)
+
+Fixed issue link and whitespace in README.md and CONTRIBUTING.md.
+(Thanks @bebehei.)
+
+Change a couple macros into functions: `GREATEST_INIT` and
+`GREATEST_PRINT_REPORT`. Most of the macros have variable capture,
+return from their call site, etc., but these two don't need to be
+macros.
+
+
+## v1.3.1 - 2017-09-22
+
+### API Changes
+
+None.
+
+
+### Other Improvements
+
+Bugfix: `GREATEST_SHUFFLE_TESTS` and `GREATEST_SHUFFLE_SUITES`
+did not check for the `stop_at_first_fail` flag, and could get
+stuck in an infinite loop. Now their loops stop as expected.
+
+Renamed `example_random.c` to `example_shuffle.c`, since its
+focus is really on random shuffling of suites and tests.
+
+
+## v1.3.0 - 2017-08-13
+
+### API Changes
+
+Added `GREATEST_SHUFFLE_SUITES(SEED, BODY)` macro (and `SHUFFLE_SUITES`
+abbreviation). This runs any suites within BODY in pseudorandom order,
+seeded by SEED.
+
+Added `GREATEST_SHUFFLE_TESTS(SEED, BODY)` macro (and `SHUFFLE_TESTS`
+abbreviation). This runs any tests within BODY in pseudorandom order,
+seeded by SEED.
+
+If `GREATEST_NO_EXTERN_CPLUSPLUS` is `#define`d, then the C++
+`extern "C" { ... }` namespacing around greatest is disabled.
+
+All calls to `fprintf` have been wrapped in a macro, `GREATEST_FPRINTF`,
+which can be `#define`d to substitute another function with the same
+interface. Feature suggestion and initial implementation by
+@AndreasMartin72.
+
+Added `greatest_stop_at_first_fail()`, to set the flag to stop the test
+runner at the first failure (`-f` in the CLI test runner).
+
+Added `void greatest_test_exclude(const char *filter)`, which takes a
+filter string and ignores all tests whose names contain the filter
+string. This takes precedence over `greatest_test_filter` matches.
+
+Added a CLI test runner option, `-x`, which calls
+`greatest_test_exclude` with its argument.
+
+
+### Other Improvements
+
+Bugfix: `GREATEST_SAVE_CONTEXT()` was only used in `GREATEST_RUN_TEST`,
+not `GREATEST_RUN_TEST1` or `GREATEST_RUN_TESTp`, which could cause
+corruption when tests using them called `ASSERT_OR_LONGJMPm` or
+`FAIL_WITH_LONGJMPm`. Reported and fixed by @tcarmelveilleux.
+
+Add `contrib/entapment` script, which converts a greatest test runner's
+verbose-style output to TAP version 13 format.
+
+Add `contrib/testify` script, which converts calls to `RUN_TEST(test);`
+to test functions with `SKIPm("TODO");`.
+
+Disabled `-Weverything` in Makefile: it isn't portable.
+
+Various improvements to the documentation.
+
+If list (`-l`) and test name filtering are both used, only tests that
+would have run are printed. This can be used to test filter strings.
+
+
 ## v1.2.2 - 2017-04-26
 
 ### API Changes
